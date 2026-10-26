@@ -1,0 +1,226 @@
+<!DOCTYPE html>
+<html lang="vi">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>OrderMind AI — Hệ Thống Quản Lý Đơn Hàng AI</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap"
+        rel="stylesheet">
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    <script src="{{ url_for('static', filename='script.js') }}" defer></script>
+</head>
+
+<body>
+    <div class="app-shell">
+
+        <!-- SIDEBAR -->
+        <aside class="sidebar">
+            <div class="brand">
+                <div class="brand-icon">✦</div>
+                <div class="brand-text">
+                    <h2>OrderMind <span>AI</span></h2>
+                    <small>ENTERPRISE SUITE</small>
+                </div>
+            </div>
+
+            <nav class="sidebar-nav">
+                <div class="menu-label">DASHBOARD</div>
+                <a href="#dashboard" class="menu-item active">
+                    <span class="icon">▦</span> Tổng quan
+                </a>
+                <a href="#orders-section" class="menu-item">
+                    <span class="icon">▤</span> Quản lý đơn hàng
+                </a>
+                <a href="#chat-section" class="menu-item">
+                    <span class="icon">✦</span> Trợ lý AI Agent
+                </a>
+            </nav>
+
+            <div class="sidebar-bottom">
+                <div class="status-dot"></div>
+                <div>
+                    <strong>System Active</strong>
+                    <small>Ollama & SQLite Ready</small>
+                </div>
+            </div>
+        </aside>
+
+        <!-- MAIN CONTENT AREA -->
+        <main class="main-content">
+
+            <!-- TOPBAR HEADER -->
+            <header class="topbar">
+                <div>
+                    <p class="breadcrumb">DASHBOARD / OVERVIEW</p>
+                    <h1>Quản Lý Đơn Hàng & AI Agent</h1>
+                </div>
+
+                <div class="local-badge">
+                    <span class="status-dot"></span>
+                    <span>Workflow Engine Online</span>
+                </div>
+            </header>
+
+            <!-- STATS CARDS GRID -->
+            <section id="dashboard" class="stats-grid">
+                <div class="stat-card">
+                    <div class="stat-top">
+                        <span>Tổng số đơn</span>
+                        <div class="stat-icon blue">▤</div>
+                    </div>
+                    <h2 id="orderCount">0</h2>
+                    <p>Đơn hàng trong hệ thống</p>
+                </div>
+
+                <div class="stat-card">
+                    <div class="stat-top">
+                        <span>Doanh thu hệ thống</span>
+                        <div class="stat-icon purple">₫</div>
+                    </div>
+                    <h2 id="totalRevenue">0 ₫</h2>
+                    <p>Cập nhật từ orders.db</p>
+                </div>
+
+                <div class="stat-card">
+                    <div class="stat-top">
+                        <span>AI Agent Harness</span>
+                        <div class="stat-icon green">✦</div>
+                    </div>
+                    <h2 class="text-green">Hoạt động</h2>
+                    <p>Ollama Llama 3.2 Model</p>
+                </div>
+            </section>
+
+            <!-- TWO COLUMN MAIN CONTENT -->
+            <div class="content-grid">
+
+                <!-- LEFT COLUMN: ORDER MANAGEMENT -->
+                <section id="orders-section" class="panel">
+                    <div class="panel-heading">
+                        <div>
+                            <h3>Danh sách đơn hàng</h3>
+                            <p>Quản lý, tạo mới và tra cứu thông tin đơn hàng</p>
+                        </div>
+                        <button type="button" class="refresh-btn" id="refreshOrdersBtn">↻ Làm mới</button>
+                    </div>
+
+                    <!-- ORDER FORM CARD -->
+                    <div class="order-form-card">
+                        <h4 id="formTitle">Tạo đơn hàng mới</h4>
+                        <form id="orderForm">
+                            <div class="form-grid">
+                                <div class="form-group">
+                                    <label for="orderId">Mã đơn hàng</label>
+                                    <input id="orderId" name="id" type="text" placeholder="DH005" required>
+                                </div>
+                                <div class="form-group">
+                                    <label for="customerName">Tên khách hàng</label>
+                                    <input id="customerName" name="name" type="text" placeholder="Nguyễn Văn A"
+                                        required>
+                                </div>
+                                <div class="form-group">
+                                    <label for="orderAmount">Số tiền (VND)</label>
+                                    <input id="orderAmount" name="amount" type="number" min="0" placeholder="250000"
+                                        required>
+                                </div>
+                                <div class="form-group">
+                                    <label for="orderStatus">Trạng thái</label>
+                                    <select id="orderStatus" name="status" required>
+                                        <option value="Dang xu ly">Đang xử lý</option>
+                                        <option value="Dang giao">Đang giao</option>
+                                        <option value="Da giao">Đã giao</option>
+                                        <option value="Da huy">Đã hủy</option>
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="form-actions">
+                                <button type="submit" id="saveOrderBtn" class="primary-btn">Lưu đơn hàng</button>
+                                <button type="button" id="cancelEditBtn" class="secondary-btn" hidden>Hủy sửa</button>
+                            </div>
+                            <p id="formMessage" class="form-message"></p>
+                        </form>
+                    </div>
+
+                    <!-- SEARCH & TABLE -->
+                    <div class="table-toolbar">
+                        <input id="orderSearch" type="search" placeholder="⌕ Tìm kiếm mã đơn hoặc tên khách hàng...">
+                        <span id="visibleOrderCount" class="result-count">0/0 đơn</span>
+                    </div>
+
+                    <div class="table-wrap">
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th>MÃ ĐƠN</th>
+                                    <th>KHÁCH HÀNG</th>
+                                    <th>SỐ TIỀN</th>
+                                    <th>TRẠNG THÁI</th>
+                                    <th style="text-align: right;">THAO TÁC</th>
+                                </tr>
+                            </thead>
+                            <tbody id="ordersTableBody">
+                                <tr>
+                                    <td colspan="5" style="text-align: center; color: var(--muted); padding: 20px;">
+                                        Đang tải dữ liệu...
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </section>
+
+                <!-- RIGHT COLUMN: AI CHAT ASSISTANT -->
+                <section id="chat-section" class="panel chat-panel">
+                    <div class="panel-heading chat-heading">
+                        <div class="assistant-avatar">✦</div>
+                        <div>
+                            <h3>OrderMind AI Agent</h3>
+                            <p><span class="status-dot"></span> Sẵn sàng trả lời dữ liệu đơn hàng</p>
+                        </div>
+                    </div>
+
+                    <!-- MESSAGES CONTAINER -->
+                    <div id="chatMessages" class="chat-messages">
+                        <!-- Default AI Welcome Message -->
+                        <div class="chat-message assistant-message message">
+                            <div class="message-avatar">✦</div>
+                            <div class="message-bubble bubble">Xin chào! Tôi là Trợ lý OrderMind AI. Bạn có thể hỏi tôi
+                                về danh sách đơn hàng, doanh thu hoặc đơn hàng đắt nhất.</div>
+                        </div>
+                    </div>
+
+                    <!-- SUGGESTION BUTTONS -->
+                    <div class="suggestions">
+                        <button
+                            onclick="document.getElementById('chatInput').value='Đơn hàng đắt nhất'; document.getElementById('chatForm').dispatchEvent(new Event('submit'))">
+                            💡 Đơn hàng đắt nhất
+                        </button>
+                        <button
+                            onclick="document.getElementById('chatInput').value='Tổng giá trị các đơn hàng'; document.getElementById('chatForm').dispatchEvent(new Event('submit'))">
+                            📊 Tổng doanh thu
+                        </button>
+                    </div>
+
+                    <!-- CHAT INPUT FORM -->
+                    <form id="chatForm" class="chat-form">
+                        <input id="chatInput" type="text" placeholder="Nhập câu hỏi cho AI..." autocomplete="off"
+                            required>
+                        <button type="submit" id="sendChatBtn">➔</button>
+                    </form>
+                    <p class="privacy-note">Truy vấn tự động trực tiếp từ cơ sở dữ liệu orders.db</p>
+                </section>
+
+            </div>
+
+            <footer>
+                <span>OrderMind AI Engine · Flask & SQLite Agent Architecture</span>
+                <span>© 2026 OrderMind</span>
+            </footer>
+        </main>
+    </div>
+</body>
+
+</html>
